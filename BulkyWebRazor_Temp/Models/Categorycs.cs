@@ -19,4 +19,4 @@ namespace BulkyWebRazor_Temp.Models
         public int DisplayOrder { get; set; }
     }
 }
-}
+
