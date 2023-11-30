@@ -19,18 +19,20 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
         public IActionResult Index()
         {
             List<Product> objProductList = _unitOfWork.Product.GetAll().ToList();
+            
+            return View(objProductList);
+        }
+
+        public IActionResult Create()
+        {
             IEnumerable<SelectListItem> categoryList = _unitOfWork.Category.GetAll().Select(x =>
             new SelectListItem
             {
                 Text = x.Name,
                 Value = x.Id.ToString()
             });
+            ViewBag.CategoryList = categoryList;
 
-            return View(objProductList);
-        }
-
-        public IActionResult Create()
-        {
             return View();
         }
 
