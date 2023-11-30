@@ -1,6 +1,8 @@
 ﻿using BulkyBook.DataAccess;
+using BulkyBook.DataAccess.Repository;
 using BulkyBook.DataAccess.Repository.IRepository;
 using BulkyBook.Models;
+using BulkyBook.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
@@ -25,28 +27,47 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
 
         public IActionResult Create()
         {
-            IEnumerable<SelectListItem> categoryList = _unitOfWork.Category.GetAll().Select(x =>
-            new SelectListItem
-            {
-                Text = x.Name,
-                Value = x.Id.ToString()
-            });
-            ViewBag.CategoryList = categoryList;
+            //IEnumerable<SelectListItem> categoryList = _unitOfWork.Category.GetAll().Select(x =>
+            //new SelectListItem
+            //{
+            //    Text = x.Name,
+            //    Value = x.Id.ToString()
+            //});
+            //ViewBag.CategoryList = categoryList;
+            //ViewData["CategoryList"] = categoryList;
 
-            return View();
+            ProductVM productVM = new ProductVM()
+            {
+                CategoryList = _unitOfWork.Category.GetAll().Select(x => new SelectListItem
+                {
+                    Text = x.Name,
+                    Value = x.Id.ToString()
+                }),
+                Product = new Product()
+            };
+
+            return View(productVM);
         }
 
         [HttpPost]
-        public IActionResult Create(Product obj)
+        public IActionResult Create(ProductVM productVM)
         {
             if (ModelState.IsValid)
             {
-                _unitOfWork.Product.Add(obj);
+                _unitOfWork.Product.Add(productVM.Product);
                 _unitOfWork.Save();
                 TempData["success"] = "Product created successfully";
                 return RedirectToAction("Index");
             }
-            return View();
+            else
+            {
+                productVM.CategoryList = _unitOfWork.Category.GetAll().Select(x => new SelectListItem
+                {
+                    Text = x.Name,
+                    Value = x.Id.ToString()
+                });
+                return View(productVM);
+            }
         }
 
         public IActionResult Edit(int? id)
