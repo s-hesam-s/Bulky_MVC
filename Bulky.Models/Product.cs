@@ -45,5 +45,7 @@ namespace BulkyBook.Models
         [ForeignKey("CategoryId")]
         public Category Category { get; set; }
 
+        public string ImageUrl { get; set; }
+
     }
 }
