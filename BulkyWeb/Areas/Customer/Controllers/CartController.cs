@@ -81,7 +81,8 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
             ShoppingCartVM.ShoppingCartList = _unitOfWork.ShoppingCart.GetAll(x =>
                 x.ApplicationUserId == userId, includeProperties: "Product");
 
-            ShoppingCartVM.OrderHeader.ApplicationUser = _unitOfWork.ApplicationUser.Get(x => x.Id == userId);
+            //ShoppingCartVM.OrderHeader.ApplicationUser = _unitOfWork.ApplicationUser.Get(x => x.Id == userId); It is Wrong
+            ApplicationUser applicationUser = _unitOfWork.ApplicationUser.Get(x => x.Id == userId);
 
             ShoppingCartVM.OrderHeader.OrderDate = DateTime.Now;
             ShoppingCartVM.OrderHeader.ApplicationUserId = userId;
@@ -92,7 +93,7 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
                 ShoppingCartVM.OrderHeader.OrderTotal += (cart.Price * cart.Count);
             }
 
-            if (ShoppingCartVM.OrderHeader.ApplicationUser.CompanyId.GetValueOrDefault() == 0)
+            if (applicationUser.CompanyId.GetValueOrDefault() == 0)
             {
                 ShoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusPending;
                 ShoppingCartVM.OrderHeader.OrderStatus = SD.StatusPending;
@@ -119,7 +120,18 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
                 _unitOfWork.Save();
             }
 
-            return View(ShoppingCartVM);
+            if (applicationUser.CompanyId.GetValueOrDefault() == 0)
+            {
+                //it is a regular customer account and we need to capture payment
+                //stripe logic
+            }
+
+            return RedirectToAction(nameof(OrderConfirmation), new { id = ShoppingCartVM.OrderHeader.Id });
+        }
+
+        public IActionResult OrderConfirmation(int id)
+        {
+            return View(id);
         }
 
         public IActionResult Plus(int cartId)
