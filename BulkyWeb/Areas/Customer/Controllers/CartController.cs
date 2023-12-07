@@ -167,6 +167,26 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
 
         public IActionResult OrderConfirmation(int id)
         {
+            OrderHeader orderHeader = _unitOfWork.OrderHeader.Get(x => x.Id == id);
+
+            if (orderHeader.PaymentStatus != SD.PaymentStatusDelayedPayment)
+            {
+                SessionService service = new SessionService();
+                Session session = service.Get(orderHeader.SessionId);
+
+                if (session.PaymentStatus.ToLower() == "paid")
+                {
+                    _unitOfWork.OrderHeader.UpdateStripePaymentID(orderHeader.Id, session.Id, session.PaymentIntentId);
+                    _unitOfWork.OrderHeader.UpdateStatus(orderHeader.Id, SD.StatusApproved, SD.PaymentStatusApproved);
+                }
+
+                List<ShoppingCart> shoppingCarts = _unitOfWork.ShoppingCart.GetAll(x => 
+                x.ApplicationUserId == orderHeader.ApplicationUserId).ToList();
+
+                _unitOfWork.ShoppingCart.RemoveRange(shoppingCarts);
+                _unitOfWork.Save();
+            }
+            
             return View(id);
         }
 
