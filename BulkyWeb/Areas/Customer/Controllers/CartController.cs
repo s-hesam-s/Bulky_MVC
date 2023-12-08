@@ -178,14 +178,17 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
                 {
                     _unitOfWork.OrderHeader.UpdateStripePaymentID(orderHeader.Id, session.Id, session.PaymentIntentId);
                     _unitOfWork.OrderHeader.UpdateStatus(orderHeader.Id, SD.StatusApproved, SD.PaymentStatusApproved);
+                    _unitOfWork.Save();
                 }
 
-                List<ShoppingCart> shoppingCarts = _unitOfWork.ShoppingCart.GetAll(x =>
+                HttpContext.Session.Clear();
+            }
+
+            List<ShoppingCart> shoppingCarts = _unitOfWork.ShoppingCart.GetAll(x =>
                 x.ApplicationUserId == orderHeader.ApplicationUserId).ToList();
 
-                _unitOfWork.ShoppingCart.RemoveRange(shoppingCarts);
-                _unitOfWork.Save();
-            }
+            _unitOfWork.ShoppingCart.RemoveRange(shoppingCarts);
+            _unitOfWork.Save();
 
             return View(id);
         }
