@@ -35,6 +35,14 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
         public IActionResult GetAll()
         {
             List<ApplicationUser> userList = _db.ApplicationUsers.Include(x => x.Company).ToList();
+
+            foreach (ApplicationUser user in userList)
+            {
+                if (user.Company == null)
+                {
+                    user.Company = new Company() { Name = "" };
+                }
+            }
             return Json(new { data = userList });
         }
 

@@ -23,6 +23,6 @@ namespace BulkyBook.Models
 
         [ForeignKey("CompanyId")]
         [ValidateNever]
-        public Company Company { get; set; }
+        public Company? Company { get; set; }
     }
 }
