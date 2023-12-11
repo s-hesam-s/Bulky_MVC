@@ -5,6 +5,7 @@ using BulkyBook.Models;
 using BulkyBook.Models.ViewModels;
 using BulkyBook.Utility;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -18,9 +19,11 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
     public class UserController : Controller
     {
         private readonly ApplicationDbContext _db;
-        public UserController(ApplicationDbContext db)
+        private readonly UserManager<IdentityUser> _userManager;
+        public UserController(ApplicationDbContext db, UserManager<IdentityUser> userManager)
         {
             _db = db;
+            _userManager = userManager;
         }
 
         public IActionResult Index()
@@ -52,6 +55,38 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
             return View(roleVM);
         }
 
+        [HttpPost]
+        public IActionResult RoleManagement(RoleManagementVM roleManagementVM)
+        {
+            var roleId = _db.UserRoles.FirstOrDefault(x => x.UserId == roleManagementVM.ApplicationUser.Id).RoleId;
+            var oldRole = _db.Roles.FirstOrDefault(x => x.Id == roleId).Name;
+            ApplicationUser userFromDb = _db.ApplicationUsers.FirstOrDefault(x => x.Id == roleManagementVM.ApplicationUser.Id);
+
+            if (oldRole != roleManagementVM.ApplicationUser.Role)
+            {
+                if (roleManagementVM.ApplicationUser.Role == SD.Role_Company)
+                {
+                    userFromDb.CompanyId = roleManagementVM.ApplicationUser.CompanyId;
+                }
+                if (oldRole == SD.Role_Company)
+                {
+                    userFromDb.CompanyId = null;
+                }
+
+                _db.SaveChanges();
+
+                _userManager.RemoveFromRoleAsync(userFromDb, oldRole).GetAwaiter().GetResult();
+                _userManager.AddToRoleAsync(userFromDb, roleManagementVM.ApplicationUser.Role).GetAwaiter().GetResult();
+            }
+            else if (roleManagementVM.ApplicationUser.Role == SD.Role_Company && 
+                     roleManagementVM.ApplicationUser.CompanyId != userFromDb.CompanyId)
+            {
+                userFromDb.CompanyId = roleManagementVM.ApplicationUser.CompanyId;
+                _db.SaveChanges();
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
 
 
         #region API CALLS
