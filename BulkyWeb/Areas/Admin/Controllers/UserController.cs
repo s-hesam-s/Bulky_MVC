@@ -28,7 +28,7 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
             return View();
         }
 
-        
+
 
         #region API CALLS
         [HttpGet]
@@ -43,7 +43,7 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
             {
                 var roleId = userRoles.FirstOrDefault(x => x.UserId == user.Id).RoleId;
                 user.Role = roles.FirstOrDefault(x => x.Id == roleId).Name;
-                
+
                 if (user.Company == null)
                 {
                     user.Company = new Company() { Name = "" };
@@ -52,11 +52,21 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
             return Json(new { data = userList });
         }
 
-        [HttpDelete]
-        public IActionResult Delete(int? id)
+        [HttpPost]
+        public IActionResult LockUnlock([FromBody] string id)
         {
-            
-            return Json(new { success = true, message = "Delete Successful" });
+            ApplicationUser userFromDb = _db.ApplicationUsers.FirstOrDefault(x => x.Id == id);
+
+            if (userFromDb == null)
+                return Json(new { success = false, message = "Error while Locking/Unlocking" });
+
+            if (userFromDb.LockoutEnd != null && userFromDb.LockoutEnd > DateTime.Now)
+                userFromDb.LockoutEnd = DateTime.Now;
+            else
+                userFromDb.LockoutEnd = DateTime.Now.AddYears(1000);
+
+            _db.SaveChanges();
+            return Json(new { success = true, message = "Operation Successful" });
         }
         #endregion
     }
