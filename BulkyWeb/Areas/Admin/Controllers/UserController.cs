@@ -36,8 +36,14 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
         {
             List<ApplicationUser> userList = _db.ApplicationUsers.Include(x => x.Company).ToList();
 
+            var userRoles = _db.UserRoles.ToList();
+            var roles = _db.Roles.ToList();
+
             foreach (ApplicationUser user in userList)
             {
+                var roleId = userRoles.FirstOrDefault(x => x.UserId == user.Id).RoleId;
+                user.Role = roles.FirstOrDefault(x => x.Id == roleId).Name;
+                
                 if (user.Company == null)
                 {
                     user.Company = new Company() { Name = "" };
