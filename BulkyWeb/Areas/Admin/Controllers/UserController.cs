@@ -28,6 +28,30 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
             return View();
         }
 
+        public IActionResult RoleManagement(string userId)
+        {
+            var roleId = _db.UserRoles.FirstOrDefault(x => x.UserId == userId).RoleId;
+
+            RoleManagementVM roleVM = new()
+            {
+                ApplicationUser = _db.ApplicationUsers.Include(x => x.Company).FirstOrDefault(x => x.Id == userId),
+                RoleList = _db.Roles.Select(x => new SelectListItem
+                {
+                    Text = x.Name,
+                    Value = x.Name
+                }),
+                CompanyList = _db.Companies.Select(x => new SelectListItem
+                {
+                    Text = x.Name,
+                    Value = x.Id.ToString()
+                })
+            };
+
+            roleVM.ApplicationUser.Role = _db.Roles.FirstOrDefault(x => x.Id == roleId).Name;
+
+            return View(roleVM);
+        }
+
 
 
         #region API CALLS
