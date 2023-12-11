@@ -36,6 +36,7 @@ namespace BulkyBook.DataAccess.Repository
                 //{
                 //    objFromDb.ImageUrl = obj.ImageUrl;
                 //}
+                objFromDb.ProductImages = obj.ProductImages;
             }
         }
     }
