@@ -186,6 +186,30 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
             }
         }
 
+        public IActionResult DeleteImage(int imageId)
+        {
+            ProductImage imageToBeDeleted = _unitOfWork.ProductImage.Get(x => x.Id == imageId);
+            int productId = imageToBeDeleted.ProductId;
+
+            if (imageToBeDeleted != null)
+            {
+                if (!string.IsNullOrEmpty(imageToBeDeleted.ImageUrl))
+                {
+                    string oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath,
+                        imageToBeDeleted.ImageUrl.TrimStart('\\'));
+                    if (System.IO.File.Exists(oldImagePath))
+                        System.IO.File.Delete(oldImagePath);                    
+                }
+
+                _unitOfWork.ProductImage.Remove(imageToBeDeleted);
+                _unitOfWork.Save();
+
+                TempData["success"] = "Deleted successfully";
+            }
+
+            return RedirectToAction(nameof(Upsert), new { Id = productId });
+        }
+
         //public IActionResult Delete(int? id)
         //{
         //    if (id == null || id == 0)
