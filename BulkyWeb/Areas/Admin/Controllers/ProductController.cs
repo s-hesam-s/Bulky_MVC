@@ -266,6 +266,18 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
             //    System.IO.File.Delete(oldImagePath);
             //}
 
+            string productPath = @"images\products\product-" + id;
+            string finalPath = Path.Combine(_webHostEnvironment.WebRootPath, productPath);
+
+            if (Directory.Exists(finalPath))
+            {
+                string[] filePaths = Directory.GetFiles(finalPath);
+                foreach (string filePath in filePaths)
+                    System.IO.File.Delete(filePath);
+
+                Directory.Delete(finalPath);
+            }
+
             _unitOfWork.Product.Remove(productToBeDeleted);
             _unitOfWork.Save();
 
