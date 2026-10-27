@@ -152,6 +152,19 @@ namespace BulkyBookWeb.Areas.Identity.Pages.Account
         {
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            var canAssignRoles = User.Identity?.IsAuthenticated == true && User.IsInRole(SD.Role_Admin);
+            var selectedRole = string.IsNullOrEmpty(Input.Role) ? SD.Role_Customer : Input.Role;
+            var allowedRoles = new[] { SD.Role_Customer, SD.Role_Company, SD.Role_Admin, SD.Role_Employee };
+            if (canAssignRoles && !allowedRoles.Contains(selectedRole, StringComparer.Ordinal))
+            {
+                ModelState.AddModelError("Input.Role", "Select a supported role.");
+                return Page();
+            }
+            Input.Role = canAssignRoles ? selectedRole : SD.Role_Customer;
+            if (Input.Role != SD.Role_Company)
+            {
+                Input.CompanyId = null;
+            }
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
@@ -176,10 +189,13 @@ namespace BulkyBookWeb.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    if (!string.IsNullOrEmpty(Input.Role))
-                        await _userManager.AddToRoleAsync(user, Input.Role);
-                    else
-                        await _userManager.AddToRoleAsync(user, SD.Role_Customer);
+                    var assignmentResult = await _userManager.AddToRoleAsync(user, Input.Role);
+                    if (!assignmentResult.Succeeded)
+                    {
+                        await _userManager.DeleteAsync(user);
+                        ModelState.AddModelError(string.Empty, "Unable to assign the account role.");
+                        return Page();
+                    }
 
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
