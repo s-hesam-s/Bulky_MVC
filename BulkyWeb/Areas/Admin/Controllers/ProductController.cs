@@ -186,6 +186,7 @@ namespace BulkyBookWeb.Areas.Admin.Controllers
             }
         }
 
+        [HttpPost]
         public IActionResult DeleteImage(int imageId)
         {
             ProductImage imageToBeDeleted = _unitOfWork.ProductImage.Get(x => x.Id == imageId);

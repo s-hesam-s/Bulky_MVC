@@ -18,7 +18,7 @@ An educational ASP.NET Core MVC bookstore application covering product administr
 | [Bulky.Utility](Bulky.Utility) | Shared constants and supporting integrations |
 | [BulkyWeb](BulkyWeb) | Main MVC application with Admin and Customer areas |
 | [BulkyWebRazor_Temp](BulkyWebRazor_Temp) | Separate Razor Pages learning sample |
-| [tests/Authorization.Tests](tests/Authorization.Tests) | Registration and role-selection regression tests |
+| [tests/Authorization.Tests](tests/Authorization.Tests) | Registration, ownership, order/payment rules and HTTP antiforgery regressions |
 
 ## Requirements and configuration
 

@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace BulkyBook.DataAccess.Repository
 {
@@ -32,6 +34,25 @@ namespace BulkyBook.DataAccess.Repository
             OrderDetail = new OrderDetailRepository(_db);
             ProductImage = new ProductImageRepository(_db);
         }
+
+        public T ExecuteInTransaction<T>(Func<T> operation)
+        {
+            using var transaction = _db.Database.BeginTransaction(IsolationLevel.Serializable);
+            var result = operation();
+            transaction.Commit();
+            return result;
+        }
+
+        public T ExecuteWithOrderLock<T>(int orderId, Func<T> operation) => ExecuteInTransaction(() =>
+        {
+            _db.OrderHeaders.FromSqlInterpolated($"SELECT * FROM [OrderHeaders] WITH (UPDLOCK, HOLDLOCK) WHERE [Id] = {orderId}")
+                .AsNoTracking().ToList();
+            // A newly created order may already be tracked before an external
+            // checkout call. Refresh it only after obtaining the database lock.
+            foreach (var entry in _db.ChangeTracker.Entries<OrderHeader>().Where(e => e.Entity.Id == orderId).ToList())
+                entry.Reload();
+            return operation();
+        });
 
         public void Save()
         {

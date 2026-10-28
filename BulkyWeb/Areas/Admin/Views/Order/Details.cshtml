@@ -1,4 +1,4 @@
-﻿@model OrderVM
+@model OrderVM
 
 <form method="post">
     <input asp-for="OrderHeader.Id" hidden />
@@ -237,8 +237,9 @@
                                     </div>
                                 </li>
                             </ul>
-                            @if (Model.OrderHeader.PaymentStatus == SD.PaymentStatusDelayedPayment &&
-                            Model.OrderHeader.OrderStatus == SD.StatusShipped)
+                            @if ((Model.OrderHeader.PaymentStatus == SD.PaymentStatusDelayedPayment || Model.OrderHeader.PaymentStatus == SD.PaymentStatusPending) &&
+                            Model.OrderHeader.ApplicationUserId == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value &&
+                            Model.OrderHeader.OrderStatus != SD.StatusCancelled)
                             {
                                 <button type="submit" class="btn btn-success form-control my-1">Pay Now</button>
                             }
@@ -254,7 +255,8 @@
                                 }
                                 @if (Model.OrderHeader.OrderStatus != SD.StatusRefunded &&
                                      Model.OrderHeader.OrderStatus != SD.StatusCancelled &&
-                                     Model.OrderHeader.OrderStatus != SD.StatusShipped)
+                                     Model.OrderHeader.OrderStatus != SD.StatusShipped &&
+                                     (Model.OrderHeader.PaymentStatus == SD.PaymentStatusPending || Model.OrderHeader.PaymentStatus == SD.PaymentStatusDelayedPayment))
                                 {
                                     <button type="submit" asp-action="CancelOrder" class="btn btn-danger form-control my-1">Cancel Order</button>
                                 }

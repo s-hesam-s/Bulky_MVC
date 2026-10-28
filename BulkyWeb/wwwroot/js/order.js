@@ -1,4 +1,4 @@
-﻿var dataTable;
+var dataTable;
 
 $(document).ready(function () {
     var url = window.location.search;
@@ -31,10 +31,10 @@ function loadDataTable(status) {
         "ajax": { url: '/admin/order/getall?status=' + status },
         "columns": [
             { data: 'id', "width": "5%" },
-            { data: 'name', "width": "25%" },
-            { data: 'phoneNumber', "width": "20%" },
-            { data: 'applicationUser.email', "width": "20%" },
-            { data: 'orderStatus', "width": "10%" },
+            { data: 'name', render: $.fn.dataTable.render.text(), "width": "25%" },
+            { data: 'phoneNumber', render: $.fn.dataTable.render.text(), "width": "20%" },
+            { data: 'applicationUser.email', render: $.fn.dataTable.render.text(), "width": "20%" },
+            { data: 'orderStatus', render: $.fn.dataTable.render.text(), "width": "10%" },
             { data: 'orderTotal', "width": "10%" },
             {
                 data: 'id',

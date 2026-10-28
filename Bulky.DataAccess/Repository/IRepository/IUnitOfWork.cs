@@ -19,5 +19,7 @@ namespace BulkyBook.DataAccess.Repository.IRepository
         IProductImageRepository ProductImage { get; }
 
         void Save();
+        T ExecuteInTransaction<T>(Func<T> operation);
+        T ExecuteWithOrderLock<T>(int orderId, Func<T> operation);
     }
 }

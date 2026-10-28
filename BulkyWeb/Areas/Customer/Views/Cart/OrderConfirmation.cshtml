@@ -1,14 +1,19 @@
-﻿@model int
-
-<div class="container row pt-4">
-    <div class="col-12 text-center">
-        <h1 class="text-primary text-center">Order Placed Successfully!</h1>
-        Your Order Number is : @Model <br /><br />
-        <img src="~/images/lawn_leaf.jpg" width="65%" />
-    </div>
-    <div class="col-12 text-center" style="color:maroon">
-        <br />
-        Your order has been placed successfully! <br />
-    </div>
-
-</div> 
+@model int
+@{ var pending = ViewData["PaymentPending"] is true; }
+<div class="container py-4 text-center">
+    <h1>@(pending ? "Payment verification required" : "Order Recorded")</h1>
+    <p>Order number: @Model</p>
+    @if (pending)
+    {
+        <p>Payment has not been confirmed for this order.</p>
+        <form method="post" asp-area="Customer" asp-controller="Cart" asp-action="VerifyPayment">
+            <input name="id" value="@Model" type="hidden" />
+            <button type="submit" class="btn btn-primary">Verify payment</button>
+        </form>
+        <form method="post" asp-area="Customer" asp-controller="Cart" asp-action="Checkout" class="mt-2">
+            <input name="id" value="@Model" type="hidden" />
+            <button type="submit" class="btn btn-outline-primary">Resume checkout</button>
+        </form>
+    }
+    <a asp-area="Admin" asp-controller="Order" asp-action="Details" asp-route-orderId="@Model" class="btn btn-link">Order details</a>
+</div>
