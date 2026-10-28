@@ -41,23 +41,28 @@ namespace BulkyBookWeb.Areas.Customer.Controllers
 
         [HttpPost]
         [Authorize]
-        public IActionResult Details(ShoppingCart shoppingCart)
+        public IActionResult Details(BulkyBook.Models.ViewModels.AddCartInput input)
         {
-            var claimsIdentity = (ClaimsIdentity)User.Identity;
-            string userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(userId)) return Forbid();
+            if (!ModelState.IsValid || input.Count < 1 || input.Count > 1000 || input.ProductId < 1)
+                return BadRequest("Invalid product or quantity.");
+            if (_unitOfWork.Product.Get(p => p.Id == input.ProductId) is null) return NotFound();
 
             ShoppingCart shoppingCartFromDb = _unitOfWork.ShoppingCart.Get(x =>
-            x.ApplicationUserId == userId && x.ProductId == shoppingCart.ProductId);
+            x.ApplicationUserId == userId && x.ProductId == input.ProductId);
 
             if (shoppingCartFromDb != null)
             {
-                shoppingCartFromDb.Count += shoppingCart.Count;
+                var quantity = (long)shoppingCartFromDb.Count + input.Count;
+                if (shoppingCartFromDb.Count < 1 || quantity > 1000) return BadRequest("Invalid quantity.");
+                shoppingCartFromDb.Count = (int)quantity;
                 _unitOfWork.ShoppingCart.Update(shoppingCartFromDb);
                 _unitOfWork.Save();
             }
             else
             {
-                shoppingCart.ApplicationUserId = userId;
+                var shoppingCart = new ShoppingCart { ApplicationUserId = userId, ProductId = input.ProductId, Count = input.Count };
                 _unitOfWork.ShoppingCart.Add(shoppingCart);
                 _unitOfWork.Save();
 
