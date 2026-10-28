@@ -4,6 +4,8 @@ on:
   push:
     branches: [master]
   pull_request:
+  schedule:
+    - cron: '21 4 * * 1'
   workflow_dispatch:
 
 permissions:
@@ -45,3 +47,8 @@ jobs:
         run: dotnet restore tools/Preview/Preview.csproj
       - name: Build isolated preview
         run: dotnet build tools/Preview/Preview.csproj --configuration Release --no-restore
+
+      - name: Check tracked documentation destinations
+        run: python scripts/check_doc_links.py
+      - name: Test documentation link regressions
+        run: python -m unittest discover -s tests -p test_doc_links.py
