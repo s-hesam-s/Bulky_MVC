@@ -2,6 +2,14 @@
 
 An educational ASP.NET Core MVC bookstore application covering product administration, shopping carts and order workflows.
 
+## Captured preview
+
+<picture><source media="(prefers-reduced-motion: reduce)" srcset="docs/screenshots/portfolio-poster.png" /><source type="image/webp" srcset="docs/screenshots/portfolio.webp" /><img src="docs/screenshots/portfolio.gif" width="100%" alt="Bulky MVC — actual captured UI states" /></picture>
+
+Existing bookstore Razor views: catalog and product details, rendered with synthetic models. No cart, order or payment transaction.
+
+[Reproduce this capture and view the static image](docs/PORTFOLIO-PREVIEW.md)
+
 ## Implementation highlights
 
 - Product/category/company management and customer storefront pages.

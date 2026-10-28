@@ -41,3 +41,7 @@ jobs:
         run: dotnet restore tests/Authorization.Tests/Authorization.Tests.csproj
       - name: Run authorization regressions
         run: dotnet test tests/Authorization.Tests/Authorization.Tests.csproj --configuration Release --no-restore --logger "console;verbosity=normal"
+      - name: Restore isolated preview
+        run: dotnet restore tools/Preview/Preview.csproj
+      - name: Build isolated preview
+        run: dotnet build tools/Preview/Preview.csproj --configuration Release --no-restore
